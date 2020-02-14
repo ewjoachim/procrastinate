@@ -5,6 +5,7 @@ services:
     volumes:
       - "./:/procrastinate_dev/"
     command: worker
+    restart: on-failure
     environment:
       PYTHONPATH: .
       PROCRASTINATE_APP: procrastinate_demo.app.app
