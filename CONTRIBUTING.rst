@@ -13,27 +13,60 @@ TL;DR
 
 .. code-block:: console
 
-    $ # Launch services within Docker
-    $ docker-compose up -d
+    $ # Start a postgres Database
+    $ docker-compose up -d postgres
 
-    $ # Create procrastinate databases
+    $ # Run the migrations to create procrastinate databases
     $ docker-compose run --rm procrastinate migrate
 
-    $ # Launch demo
+    $ # Start the procrastinate worker
+    $ docker-compose up -d procrastinate
+
+    $ # Display the procrastinate command's help message
     $ docker-compose run --rm procrastinate -h
 
     $ # Launch tests from the docker container
     $ docker-compose exec procrastinate pytest
 
-    $ # Outside of docker containers:
+Alternatively if you want to develop from your host machine:
+
+.. code-block:: console
+
+    $ # Start a postgres Database
+    $ docker-compose up -d postgres
+
     $ # Install requirements
     $ pip install -r requirements.txt
 
     $ # Explore tox entrypoints
     $ tox -l
 
-Instructions for contribution
------------------------------
+Instructions for using docker-compose
+-------------------------------------
+
+Crash course of docker-compose
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Docker-compose_ is a docker tool to run several containers and chain them together to setup your stack. In procrastinate, we setup a postgres database in a container, and a procratinate worker in another container. Here are some of the most useful commands in case you don't know this tool:
+
+.. code-block:: console
+
+    $ # Build or re-build the docker image corresponding to the procrastinate worker
+    $ docker-compose build procrastinate
+
+    $ # Start all services in detached mode
+    $ docker-compose up -d
+
+    $ # Run another procrastinate command in a new instance of the procrastinate docker image
+    $ docker-compose run --rm procrastinate healthchecks
+
+    $ # Execute any bash command in the already running procrastinate docker image
+    $ docker-compose exec procrastinate echo "Hello world"
+
+    $ # If you changed some code on procrastinate and need to restart the worker
+    $ docker-compose restart procrastinate
+
+.. _Docker-compose: https://docs.docker.com/compose/
 
 Create your development database
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -51,6 +84,68 @@ The first time, you additionally need to create procrastinate databases.
 .. code-block:: console
 
     $ docker-compose run --rm procrastinate migrate
+
+Try our demo
+^^^^^^^^^^^^
+
+You can see the docker worker with:
+
+.. code-block:: console
+
+    $ docker-compose logs -ft procrastinate
+
+Schedule some tasks with:
+
+.. code-block:: console
+
+    $ docker-compose run --rm procrastinate defer procrastinate_demo.tasks.sum '{"a":3, "b": 5}'
+
+Or
+
+.. code-block:: console
+
+    $ docker-compose exec procrastinate python -m procrastinate_demo
+
+Run the project automated tests
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Within docker container:
+
+.. code-block:: console
+
+    $ docker-compose exec procrastinate pytest  # Test the code using the docker image
+
+To look at coverage in the browser after launching the tests, open the generated webpage in the repository:
+
+.. code-block:: console
+
+    $ python -m webbrowser htmlcov/index.html
+
+Build the documentation
+^^^^^^^^^^^^^^^^^^^^^^^
+
+.. code-block:: console
+
+    $ docker-compose exec procrastinate tox -e docs
+    $ python -m webbrowser docs/_build/html/index.html
+
+Developing outside of docker-compose
+------------------------------------
+
+If you prefer to work directly from your host machine, you can use virtualenv or tox to setup a development environment. Note that you need to have a running postgresql database, either on your machine, by using a docker image of postgresql, or by reusing only the postgresql part of the docker-compose
+
+.. code-block:: console
+
+    $ docker-compose start postgres
+
+The `export` command below will be necessary whenever you want to interact with
+the database (using the project locally, launching tests, ...).
+These are standard ``libpq`` environment variables, and the values used below correspond
+to the docker setup. Feel free to adjust them as necessary.
+
+.. code-block:: console
+
+    $ export PGDATABASE=procrastinate PGHOST=localhost PGUSER=postgres
 
 Set up your development environment
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -96,11 +191,11 @@ Install local dependencies:
 Run the project automated tests
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Within docker container:
+With a running database:
 
 .. code-block:: console
 
-    $ docker-compose exec procrastinate pytest  # Test the code with the latest python
+    (venv) $ pytest  # Test the code with the current interpreter
 
 Or
 
@@ -190,27 +285,6 @@ not related to your PR (but please put it in a dedicated commit).
 
 If you need to add words to the spell checking dictionary, it's in
 ``docs/spelling_wordlist.txt``. Make sure the file is alphabetically sorted!
-
-Try our demo
-------------
-
-You can see the docker worker with:
-
-.. code-block:: console
-
-    $ docker-compose logs -ft procrastinate
-
-Schedule some tasks with:
-
-.. code-block:: console
-
-    $ docker-compose run --rm procrastinate defer procrastinate_demo.tasks.sum '{"a":3, "b": 5}'
-
-Or
-
-.. code-block:: console
-
-    $ docker-compose exec procrastinate python -m procrastinate_demo
 
 Wait, there are ``async`` and ``await`` keywords everywhere!?
 -------------------------------------------------------------
