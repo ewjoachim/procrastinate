@@ -13,41 +13,27 @@ TL;DR
 
 .. code-block:: console
 
-    $ # Export libpq env vars for PG connection
-    $ export PGDATABASE=procrastinate PGHOST=localhost PGUSER=postgres
-
-    $ # Launch PostgreSQL within Docker
+    $ # Launch services within Docker
     $ docker-compose up -d
+
+    $ # Create procrastinate databases
+    $ docker-compose run --rm procrastinate migrate
+
+    $ # Launch demo
+    $ docker-compose run --rm procrastinate -h
+
+    $ # Launch tests from the docker container
+    $ docker-compose exec procrastinate pytest
+
+    $ # Outside of docker containers:
+    $ # Install requirements
+    $ pip install -r requirements.txt
 
     $ # Explore tox entrypoints
     $ tox -l
 
-    $ # You can do things without tox too:
-
-    $ # Install requirements
-    $ pip install -r requirements.txt
-
-    $ # Launch tests
-    $ pytest
-
-    $ # Launch demo
-    $ export PROCRASTINATE_APP=procrastinate_demo.app.app
-    $ procrastinate -h
-
 Instructions for contribution
 -----------------------------
-
-Environment variables
-^^^^^^^^^^^^^^^^^^^^^
-
-The `export` command below will be necessary whenever you want to interact with
-the database (using the project locally, launching tests, ...).
-These are standard ``libpq`` environment variables, and the values used below correspond
-to the docker setup. Feel free to adjust them as necessary.
-
-.. code-block:: console
-
-    $ export PGDATABASE=procrastinate PGHOST=localhost PGUSER=postgres
 
 Create your development database
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -60,14 +46,11 @@ on the latest stable version.
 
     $ docker-compose up -d
 
-If you want to try out the project locally, it's useful to have ``postgresql-client``
-installed. It will give you both a PostgreSQL console (``psql``) and specialized
-commands like ``createdb`` we use below.
+The first time, you additionally need to create procrastinate databases.
 
 .. code-block:: console
 
-    $ sudo apt install postgresql-client
-    $ createdb
+    $ docker-compose run --rm procrastinate migrate
 
 Set up your development environment
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -113,11 +96,11 @@ Install local dependencies:
 Run the project automated tests
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-With a running database:
+Within docker container:
 
 .. code-block:: console
 
-    (venv) $ pytest  # Test the code with the current interpreter
+    $ docker-compose exec procrastinate pytest  # Test the code with the latest python
 
 Or
 
@@ -211,21 +194,23 @@ If you need to add words to the spell checking dictionary, it's in
 Try our demo
 ------------
 
-With a running database:
-
-Launch a worker with:
+You can see the docker worker with:
 
 .. code-block:: console
 
-    (venv) $ export PROCRASTINATE_APP=procrastinate_demo.app.app
-    (venv) $ procrastinate migrate
-    (venv) $ procrastinate worker
+    $ docker-compose logs -ft procrastinate
 
 Schedule some tasks with:
 
 .. code-block:: console
 
-    (venv) $ python -m procrastinate_demo
+    $ docker-compose run --rm procrastinate defer procrastinate_demo.tasks.sum '{"a":3, "b": 5}'
+
+Or
+
+.. code-block:: console
+
+    $ docker-compose exec procrastinate python -m procrastinate_demo
 
 Wait, there are ``async`` and ``await`` keywords everywhere!?
 -------------------------------------------------------------
