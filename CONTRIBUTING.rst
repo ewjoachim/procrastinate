@@ -77,7 +77,7 @@ on the latest stable version.
 
 .. code-block:: console
 
-    $ docker-compose up -d
+    $ docker-compose up -d postgres
 
 The first time, you additionally need to create procrastinate databases.
 
@@ -88,7 +88,13 @@ The first time, you additionally need to create procrastinate databases.
 Try our demo
 ^^^^^^^^^^^^
 
-You can see the docker worker with:
+After setting up the database, you can then launch the procrastinate worker
+
+.. code-block:: console
+
+    $ docker-compose up -d procrastinate
+
+You can see the worker logs with:
 
 .. code-block:: console
 
@@ -100,7 +106,7 @@ Schedule some tasks with:
 
     $ docker-compose run --rm procrastinate defer procrastinate_demo.tasks.sum '{"a":3, "b": 5}'
 
-Or
+Or launch all the demo main file and its tasks:
 
 .. code-block:: console
 
@@ -113,7 +119,8 @@ Within docker container:
 
 .. code-block:: console
 
-    $ docker-compose exec procrastinate pytest  # Test the code using the docker image
+    $ # Test the code using the docker image's python interpreter
+    $ docker-compose exec procrastinate pytest
 
 To look at coverage in the browser after launching the tests, open the generated webpage in the repository:
 
@@ -123,6 +130,8 @@ To look at coverage in the browser after launching the tests, open the generated
 
 Build the documentation
 ^^^^^^^^^^^^^^^^^^^^^^^
+
+You can build the documentation from inside the procrastinate container to check your changes
 
 .. code-block:: console
 
