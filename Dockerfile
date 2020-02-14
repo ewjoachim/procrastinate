@@ -1,12 +1,8 @@
-FROM python:3.7-buster
+FROM python:3
 
 WORKDIR /procrastinate_dev/
-COPY requirements.txt ./
-COPY setup.* ./
-COPY procrastinate ./procrastinate/
+COPY . ./
 RUN pip install -r requirements.txt
-
-COPY procrastinate_demo ./procrastinate_demo/
 
 ENTRYPOINT ["procrastinate"]
 CMD ["--help"]

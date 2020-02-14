@@ -3,8 +3,7 @@ services:
   procrastinate:
     build: .
     volumes:
-      - "./procrastinate:/procrastinate_dev/procrastinate"
-      - "./procrastinate_demo:/procrastinate_dev/procrastinate_demo"
+      - "./:/procrastinate_dev/"
     command: worker
     environment:
       PYTHONPATH: .
