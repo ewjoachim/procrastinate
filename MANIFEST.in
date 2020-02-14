@@ -10,4 +10,3 @@ exclude pre-commit-hook
 recursive-include procrastinate *.sql
 include LICENSE.rst
 exclude Dockerfile
-exclude .dockerignore
